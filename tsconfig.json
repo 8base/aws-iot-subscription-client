@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "diagnostics": true,
+        "module": "commonjs",
+        "target": "es6",
+        "noImplicitAny": true,
+        "lib": [ "es2016", "esnext.asynciterable", "es2016.array.include", "dom" ],
+        "moduleResolution": "node",        
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,        
+        "outDir": "lib",
+        "baseUrl": ".",
+        "sourceMap": true,
+        "allowJs": true,
+        "typeRoots": [
+            "node_modules/@types"
+        ],        
+        "paths": {
+            "*": [
+                "src/types/*"
+            ]
+        }
+    },
+    "include": [
+        "example",
+        "src",
+        "actions",
+        "deploy"
+    ],
+    "exclude": [
+        "dist",
+        "template",
+        
+    ]
+}

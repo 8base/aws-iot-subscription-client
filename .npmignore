@@ -1,0 +1,8 @@
+dist/tests/
+src/
+examples/
+tests/
+.travis.yml
+tsconfig.json
+tslint.json
+typings.d.ts

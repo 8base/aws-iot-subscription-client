@@ -28,16 +28,16 @@ export class SubscriptionClientLink extends ApolloLink {
         }
 
         if (!this.client.isConnected) {
-            this.client.connect(Specific.getIdToken(operation));
+            this.client.connect();
         }
 
-        // TODO return subscription observable after forwarded operation
-        /*
-            forward subscription to http link for processing on the server side. Hard.
-        */
         forwardedLink(operation).subscribe({
-            next: () => {},
-            complete: () => { },
+            next: (result: any) => {
+                console.log(result);
+            },
+            complete: () => {
+                console.log("complete");
+            },
             error: (err: Error) => {
                 console.log(err);
             }
@@ -48,6 +48,53 @@ export class SubscriptionClientLink extends ApolloLink {
 
 
 
+    request1(operation: Operation, forward: NextLink) {
+        return new Observable(observer => {
+
+          const promises: Promise<any>[] = [];
+
+          const handleFile = (variables: Record<string, any>, fieldName: string | number) => {
+            const file = variables[fieldName];
+
+            FileServer.uploadLink(file, file.meta || file.metadata, !!file.public,
+              (req: GraphQLRequest) => forward(createOperation(operation.getContext(), req)),
+              (error) => {
+                observer.next(error);
+                observer.complete();
+                return;
+              });
+
+            file.upload.onstart = (data: any) => {
+              if (variables) {
+                variables[fieldName] = data.id;
+              }
+            };
+
+            promises.push(new Promise((resolve: any, reject: any) => {
+              file.request.ontimeout = (err: any) => reject(err);
+              file.request.onabort = (err: any) => reject(err);
+              file.request.onerror = (err: any) => reject(err);
+              file.request.onload = () => resolve();
+              return;
+            }));
+          };
+
+          mutateOperationVariables(operation.variables || {}, handleFile);
+
+          Promise.all(promises).then(() => {
+            forward(operation).subscribe({
+              error: (error: any) => {
+                observer.error(error);
+              },
+              next: observer.next.bind(observer),
+              complete: () => observer.complete()
+            });
+          }).catch((err) => {
+            observer.error(err);
+          });
+
+        });
+      }
 
 
 }

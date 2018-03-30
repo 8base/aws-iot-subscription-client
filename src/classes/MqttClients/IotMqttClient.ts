@@ -8,6 +8,8 @@ export class IotMqttClient implements IMqttClient {
 
     private onReceive: Function = () => {};
     private onClose: Function = () => {};
+    private onConnected: Function = () => {};
+
     private client: DeviceSdk.device;
 
     private options: IotMqttConnectionOpertions;
@@ -45,29 +47,34 @@ export class IotMqttClient implements IMqttClient {
             this.onClose();
         });
 
+        this.client.on("connect", (err: Error) => {
+            this.onConnected();
+        });
+
     }
 
-    connect(credentials: CloudConnectCredentials, onReceive: Function, onClose: Function) {
+    async connect(credentials: CloudConnectCredentials, onReceive: Function, onClose: Function, onConnected: Function): Promise<void> {
 
         this.onReceive = onReceive;
         this.onClose = onClose;
+        this.onConnected = onConnected;
 
         this.client.updateWebSocketCredentials(credentials.accessKeyId, credentials.secretAccessKey, credentials.sessionToken, null);
     }
 
-    async subscribe(topic: string, options: IClientSubscribeOptions): Promise<any> {
+    async subscribe(topic: string, options: IClientSubscribeOptions): Promise<boolean> {
 
-        return new Promise((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             this.client.subscribe(topic,
                 {
                     qos: options.qos
                 },
-                (err: Error, data: any) => {
+                (err: Error, granted: any) => {
                     if (err) {
                         return reject(err);
                     }
 
-                    resolve(data);
+                    resolve(true);
                 });
         });
     }

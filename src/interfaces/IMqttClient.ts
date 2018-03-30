@@ -4,14 +4,14 @@ import { CloudConnectCredentials } from "../types";
 
 export interface IConnectOptionsResolver {
 
-    /* async */ resolve(token: string): Promise<aws.Credentials>;
+    /* async */ resolve(): Promise<aws.Credentials>;
 }
 
 export interface IMqttClient {
 
-    /* async */ connect(credentials: CloudConnectCredentials, onReceive: Function, onClose: Function): void;
+    /* async */ connect(credentials: CloudConnectCredentials, onReceive: Function, onClose: Function, onConnected: Function): Promise<void>;
 
-    /* async */ subscribe(topic: string, options: IClientSubscribeOptions): Promise<any>;
+    /* async */ subscribe(topic: string, options: IClientSubscribeOptions): Promise<boolean>;
 
     unsubscribe(topic: string): void;
 }

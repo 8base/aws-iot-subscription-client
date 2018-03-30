@@ -12,7 +12,7 @@ export abstract class Subscription {
   protected abstract get path(): string;
 
   get id(): string {
-    return path.join(this.room/*, this.user*/, this.path);
+    return path.join(this.room,/* this.user, */ this.path);
   }
 
   room: string;
@@ -21,14 +21,18 @@ export abstract class Subscription {
 }
 
 /*
-    summury path = account/user/action
+    summury path = account/user/action/hash
+    hash = query string hash
+    action = entity_action
 */
 
 export class EntitySubscription extends Subscription {
 
   protected get path(): string {
-    return this.actionHash;
+    return path.join(this.action, this.hash);
   }
 
-  actionHash: string;
+  action: string;
+
+  hash: string;
 }

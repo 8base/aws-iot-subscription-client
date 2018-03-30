@@ -35,26 +35,22 @@ export class SubscriptionCloudClient {
         this.mqttClient = mqttClient;
     }
 
-    connect(idToken: string) {
+    connect(credentials: CloudConnectCredentials) {
         this.status = ClientStatus.Connecting;
 
-        this.resolver.resolve(idToken)
-            .then((credentials: CloudConnectCredentials) => {
-                return this.mqttClient.connect(
-                    credentials,
-                    this.onReceive.bind(this),
-                    this.onClose.bind(this)
-                );
-            })
-            .then(() => {
-                this.status = ClientStatus.Connected;
-                this.subscriptionQueue.map(subscription => this.subscribeMqtt(subscription));
-                this.subscriptionQueue = [];
-            })
-            .catch((err: Error) => {
-                this.status = ClientStatus.Offline;
-                console.log(err);
-            });
+        this.mqttClient.connect(
+            credentials,
+            this.onReceive.bind(this),
+            this.onClose.bind(this),
+            this.onConnect.bind(this)
+        )
+        .then(() => {
+            this.subscriptionQueue.filter(async subscription =>  !! await this.connectTransport(subscription));
+        })
+        .catch((err: Error) => {
+            this.status = ClientStatus.Offline;
+            console.log(err);
+        });
     }
 
     get isConnected(): boolean {
@@ -95,6 +91,10 @@ export class SubscriptionCloudClient {
         this.status = ClientStatus.Offline;
     }
 
+    private onConnect() {
+        this.status = ClientStatus.Connected;
+    }
+
     private processResponce(data: any) {
         try {
             return JSON.parse(String(data));
@@ -104,7 +104,7 @@ export class SubscriptionCloudClient {
         return null;
     }
 
-    private subscribeMqtt(subscription: Subscription) {
-        this.mqttClient.subscribe(subscription.id, { qos: 1 });
+    private async connectTransport(subscription: Subscription): Promise<boolean> {
+        return await this.mqttClient.subscribe(subscription.id, { qos: 1 });
     }
 }

@@ -12,8 +12,11 @@ export class CognitoConnectionResolver implements IConnectOptionsResolver {
         this.options = options;
     }
 
-    async resolve(token: string): Promise<AWS.Credentials> {
+    async resolve(): Promise<AWS.Credentials> {
+
        return new Promise<AWS.Credentials>((resolve, reject) => {
+
+
 
             const providerKey = `cognito-idp.${this.options.region}.amazonaws.com/${this.options.userPoolId}`;
 

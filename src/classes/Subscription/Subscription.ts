@@ -27,8 +27,9 @@ export abstract class Subscription {
 export class EntitySubscription extends Subscription {
 
   protected get path(): string {
-    return this.actionHash;
+    return path.join(this.action, this.hash);
   }
 
-  actionHash: string;
+  action: string;
+  hash: string;
 }

@@ -1,2 +1,2 @@
-export * from "./SubscriptionCloudClient";
+export * from "./SubscriptionClient";
 export * from "./SubscriptionClientLink";

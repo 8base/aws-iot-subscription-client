@@ -4,14 +4,13 @@ export type CognitoConnectionOptions = {
   userPoolId: string
 };
 
-export type IotMqttConnectionOpertions = {
-  region: string,
-  iotEndpoint: string,
-  debug: boolean
-};
-
-export type CloudConnectCredentials = {
+export interface ConnectCredentials {
   accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken: string;
-};
+  secretKey: string;
+  refreshToken: string;
+}
+
+export interface MqttConnectOptions extends ConnectCredentials {
+  iotEndpoint: string;
+  region: string;
+}

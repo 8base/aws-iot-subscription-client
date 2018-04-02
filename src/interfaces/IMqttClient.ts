@@ -1,15 +1,14 @@
 import { IClientSubscribeOptions } from 'mqtt';
-import * as aws from "aws-sdk";
-import { CloudConnectCredentials } from "../types";
+import { MqttConnectOptions } from "../types";
 
 export interface IConnectOptionsResolver {
 
-    /* async */ resolve(token: string): Promise<aws.Credentials>;
+    /* async */ resolve(): Promise<MqttConnectOptions>;
 }
 
 export interface IMqttClient {
 
-    /* async */ connect(credentials: CloudConnectCredentials, onReceive: Function, onClose: Function): void;
+    /* async */ connect(options: MqttConnectOptions, onReceive: Function, onClose: Function, onConnect: Function): void;
 
     /* async */ subscribe(topic: string, options: IClientSubscribeOptions): Promise<any>;
 

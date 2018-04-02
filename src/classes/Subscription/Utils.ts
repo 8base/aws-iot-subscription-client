@@ -7,23 +7,19 @@ const sha256 = require("sha256");
 export namespace Specific {
 
   /*
-    SubscriptionFromOperation and getIdToken specific functions. Should be generalize
+    SubscriptionFromOperation is specific functions. Should be generalize
     conver operation to subscription struct
     account-id => room
     action => sha256 from query string
   */
 
 
-  export function SubscriptionFromOperation(operation: Operation) {
+  export function SubscriptionFromOperation(action: string, operation: Operation) {
     let subscription = new EntitySubscription();
     subscription.room = operation.getContext()["headers"]["account-id"];
-    subscription.actionHash = sha256(JSON.stringify(operation.query));
+    subscription.action = action;
+    subscription.hash = sha256(JSON.stringify(operation.query));
     return subscription;
-  }
-
-
-  export function getIdToken(operation: Operation): string {
-    return operation.getContext()["headers"]["token"];
   }
 }
 

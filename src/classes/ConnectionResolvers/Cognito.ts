@@ -1,27 +1,30 @@
 import { IConnectOptionsResolver } from "../../interfaces";
 import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import * as AWS from "aws-sdk";
-import { CognitoConnectionOptions } from "../../types";
+import { MqttConnectOptions } from "../../types";
 
+/*
+    example resolve iot credentials
+*/
 
 export class CognitoConnectionResolver implements IConnectOptionsResolver {
 
-    private options: CognitoConnectionOptions;
+    private region = "";
+    private userPoolId = "";
+    private identityPoolId = "";
+    private endpoint = "";
+    private token = "";
 
-    constructor(options: CognitoConnectionOptions) {
-        this.options = options;
-    }
+    async resolve(): Promise<MqttConnectOptions> {
+       return new Promise<MqttConnectOptions>((resolve, reject) => {
 
-    async resolve(token: string): Promise<AWS.Credentials> {
-       return new Promise<AWS.Credentials>((resolve, reject) => {
+            const providerKey = `cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}`;
 
-            const providerKey = `cognito-idp.${this.options.region}.amazonaws.com/${this.options.userPoolId}`;
-
-            AWS.config.region = this.options.region;
+            AWS.config.region = this.region;
             AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-                IdentityPoolId: this.options.identityPoolId,
+                IdentityPoolId: this.identityPoolId,
                 Logins: {
-                    [providerKey]: token
+                    [providerKey]: this.token
                 }
             });
 
@@ -31,7 +34,14 @@ export class CognitoConnectionResolver implements IConnectOptionsResolver {
                     return reject(error);
                 }
 
-                resolve(<AWS.Credentials>AWS.config.credentials);
+                const credentials = <AWS.Credentials>AWS.config.credentials;
+                resolve({
+                    secretKey: credentials.secretAccessKey,
+                    refreshToken: credentials.sessionToken,
+                    accessKeyId: credentials.accessKeyId,
+                    region: this.region,
+                    iotEndpoint: this.endpoint
+                });
             });
         });
     }

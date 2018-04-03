@@ -2,11 +2,11 @@ import { ApolloLink, NextLink, Operation, FetchResult, Observable, createOperati
 import { SubscriptionClient } from "./SubscriptionClient";
 import * as aws from "aws-sdk";
 import { DocumentNode, getOperationAST } from 'graphql';
-import { Specific, isASubscriptionOperation } from "./Utils";
+import { SubscriptionFromOperation, isASubscriptionOperation } from "./Utils";
 import { MqttClient } from "../MqttClients";
 import gql from "graphql-tag";
-import { MqttConnectOptions } from "../../types";
-import { Subscription } from "./Subscription";
+import { MqttConnectOptions, Subscription } from "../../types";
+
 
 let obss: any [] = [];
 
@@ -22,10 +22,11 @@ export class SubscriptionClientLink extends ApolloLink {
 
     /*
         1. If operation is not subscription => forward to the next link
-        2. If subscription client is not connected => connect
-        3. Forward operation to the next link. Server should process subscription data. (save in redis and so on)
-        4. Subscribe on cloud subscrption client
-        5. Return observable
+        2. If subscription client is not connected => send connect request to server
+        3. Send server subscription request
+        4. Get response, get action name => construct subscription struct
+        5. Susbcribe on remote (cloud) websocket service
+        6. Return observable
     */
     request(operation: Operation, forwardedLink: NextLink): Observable<FetchResult> {
 
@@ -49,12 +50,31 @@ export class SubscriptionClientLink extends ApolloLink {
         });
     }
 
+    /*
+        send subscription to server
+        responce format:
+        {
+            data: {
+                *actionName*: {
+                    ...
+                }
+            }
+        }
+
+        *actionName* use for subscription data
+    */
     private async subscribeServer(operation: Operation, forwardedLink: NextLink): Promise<Subscription> {
         return (new Promise<Subscription>((resolve, reject) => {
             forwardedLink(operation).subscribe({
                 next: ({ data }: any) => {
                     const action = (data: any) => { return Object.keys(data)[0]; };
-                    resolve(Specific.SubscriptionFromOperation(action(data), operation));
+                    const account = operation.getContext()["headers"]["account-id"];
+                    resolve(
+                        SubscriptionFromOperation(
+                            action(data),
+                            account,
+                            operation)
+                        );
                 },
                 complete: () => { },
                 error: (err: Error) => {

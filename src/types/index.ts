@@ -14,3 +14,5 @@ export interface MqttConnectOptions extends ConnectCredentials {
   iotEndpoint: string;
   region: string;
 }
+
+export * from "./Subscription";

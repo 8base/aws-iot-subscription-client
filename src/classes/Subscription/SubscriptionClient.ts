@@ -1,10 +1,9 @@
 
 import { ApolloLink, Operation, NextLink, FetchResult, Observable } from "apollo-link";
-import { IMqttClient, IConnectOptionsResolver } from "../../interfaces";
-import { Subscription } from "./Subscription";
 import { IClientSubscribeOptions } from 'mqtt';
-// import { SubscriptionObservable } from "./SubscriptionObservable";
-import { MqttConnectOptions } from "../../types";
+
+import { IMqttClient, IConnectOptionsResolver } from "../../interfaces";
+import { MqttConnectOptions, Subscription } from "../../types";
 
 
 enum ClientStatus {

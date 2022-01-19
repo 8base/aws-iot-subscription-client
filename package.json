@@ -43,7 +43,7 @@
     "amazon-cognito-identity-js": "^2.0.1",
     "graphql": "^0.11.7",
     "aws-iot-device-sdk": "^2.2.1",
-    "isomorphic-fetch": "^2.2.1",
+    "isomorphic-fetch": "^3.0.0",
     "sha256": "^0.2.0",
     "graphql-tag": "^2.8.0"
   },

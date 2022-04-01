@@ -42,7 +42,7 @@
     "zen-observable-ts": "^0.8.8",
     "amazon-cognito-identity-js": "^2.0.1",
     "graphql": "^0.11.7",
-    "aws-iot-device-sdk": "^2.2.1",
+    "aws-iot-device-sdk": "^2.2.12",
     "isomorphic-fetch": "^2.2.1",
     "sha256": "^0.2.0",
     "graphql-tag": "^2.8.0"
